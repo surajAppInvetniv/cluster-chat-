@@ -18,13 +18,13 @@
 
 # Default server configuration
 #
-
 upstream chatservice {
 	server localhost:4000;
 }
 
 server {
 	listen 8000;
+
 	# SSL configuration
 	#
 	# listen 443 ssl default_server;
@@ -49,9 +49,16 @@ server {
 	server_name _;
 
 	location / {
+		# First attempt to serve request as file, then
+		# as directory, then fall back to displaying a 404.
 		proxy_pass http://chatservice;
+		proxy_set_header   X-Forwarded-For $remote_addr;
+		proxy_set_header   Host $http_host;
+		proxy_http_version 1.1;
+		proxy_set_header   Upgrade $http_upgrade;
+		proxy_set_header   Connection "upgrade";
 	}
-    
+
 	# pass PHP scripts to FastCGI server
 	#
 	#location ~ \.php$ {
